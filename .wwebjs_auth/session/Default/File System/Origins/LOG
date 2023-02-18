@@ -1,0 +1,4 @@
+2023/02/17-21:44:08.702 95f4 Log #3: 3 ops saved to Table #4 OK
+2023/02/17-21:44:09.721 95f4 Archiving C:\Users\Luis Martinez\Desktop\dev\wedding-invitation-server\.wwebjs_auth\session\Default\File System\Origins/000003.log: IO error: C:\Users\Luis Martinez\Desktop\dev\wedding-invitation-server\.wwebjs_auth\session\Default\File System\Origins/000003.log: Could not rename file: File currently in use. (ChromeMethodBFE: 14::RenameFile::2)
+2023/02/17-21:44:09.721 95f4 Table #4: 3 entries OK
+2023/02/17-21:44:10.727 95f4 Archiving C:\Users\Luis Martinez\Desktop\dev\wedding-invitation-server\.wwebjs_auth\session\Default\File System\Origins/MANIFEST-000001: IO error: C:\Users\Luis Martinez\Desktop\dev\wedding-invitation-server\.wwebjs_auth\session\Default\File System\Origins/MANIFEST-000001: Could not rename file: File currently in use. (ChromeMethodBFE: 14::RenameFile::2)
