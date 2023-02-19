@@ -1,3 +1,3 @@
-2023/02/19-16:23:03.213 5120 Reusing MANIFEST C:\Users\Luis Martinez\Desktop\dev\wedding-invitation-server\.wwebjs_auth\session\Default\Local Storage\leveldb/MANIFEST-000001
-2023/02/19-16:23:03.228 5120 Recovering log #7
-2023/02/19-16:23:03.234 5120 Reusing old log C:\Users\Luis Martinez\Desktop\dev\wedding-invitation-server\.wwebjs_auth\session\Default\Local Storage\leveldb/000007.log 
+2023/02/19-18:47:25.034 af80 Reusing MANIFEST C:\Users\Luis Martinez\Desktop\dev\wedding-invitation-server\.wwebjs_auth\session\Default\Local Storage\leveldb/MANIFEST-000001
+2023/02/19-18:47:25.040 af80 Recovering log #10
+2023/02/19-18:47:25.046 af80 Reusing old log C:\Users\Luis Martinez\Desktop\dev\wedding-invitation-server\.wwebjs_auth\session\Default\Local Storage\leveldb/000010.log 
