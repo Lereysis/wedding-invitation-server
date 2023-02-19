@@ -2,9 +2,12 @@ const createHttpError = require('http-errors')
 const { User, Guest } = require('../database/models')
 const { endpointResponse } = require('../helpers/success')
 const { catchAsync } = require('../helpers/catchAsync')
-const { Client } = require('whatsapp-web.js');
+const { Client, LocalAuth } = require('whatsapp-web.js');
 
-const client = new Client();
+const client = new Client({
+  authStrategy: new LocalAuth(),
+  puppeteer:{ headless: false }
+});
 
 module.exports = {
   getUsers: catchAsync(async (req, res, next) => {
@@ -139,7 +142,7 @@ module.exports = {
           body: qr,
         })
       });
-      client.initialize()       
+     client.initialize()
     } catch (error) {
       const httpError = createHttpError(
         error.statusCode,
@@ -172,13 +175,7 @@ module.exports = {
         body: await client.getState(),
       })
       const sanitized_number = number.toString().replace(/[- )(]/g, ""); 
-      const final_number = `${sanitized_number.substring(sanitized_number.length - 10)}`;
-      const number_details = await client.getNumberId(final_number);
-      if (number_details) {
-          await client.sendMessage(number_details._serialized, `Hola que tal, como estas? estoy feliz de invitarte a mi boda para ver tu invitacion puedes entrar al link ⛪️ \n \n \n ${message}`);
-      } else {
-          console.log(final_number, "Mobile number is not registered");
-      }
+      await client.sendMessage(sanitized_number+'@c.us', `Hola que tal, como estas? estoy feliz de invitarte a mi boda para ver tu invitacion puedes entrar al link ⛪️ \n \n \n ${message.trim()}`);
     } catch (error) {
       const httpError = createHttpError(
         error.statusCode,
@@ -189,4 +186,4 @@ module.exports = {
   }),
 }
 
-client.initialize();
+client.initialize()
