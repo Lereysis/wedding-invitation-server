@@ -17,6 +17,9 @@ module.exports = {
       numberGuest: {
         type: Sequelize.STRING
       },
+      slug: {
+        type: Sequelize.STRING
+      },
       isConfirmed: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,

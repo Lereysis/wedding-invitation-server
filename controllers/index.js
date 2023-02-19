@@ -7,7 +7,7 @@ const { Client } = require('whatsapp-web.js');
 const client = new Client();
 
 module.exports = {
-  get: catchAsync(async (req, res, next) => {
+  getUsers: catchAsync(async (req, res, next) => {
     try {
       const response = await User.findAll()
       endpointResponse({
@@ -23,7 +23,7 @@ module.exports = {
       next(httpError)
     }
   }),
-  post: catchAsync(async (req, res, next) => {
+  postUser: catchAsync(async (req, res, next) => {
     try {
       const response = await User.create({...req.body})
       endpointResponse({
@@ -46,10 +46,33 @@ module.exports = {
           email:req.body.email
         }
       })
+      const creatingSlug = req.body.name.trim().toLowerCase().replace(/ /g,"-");
       const response = await user.createGuest({
         name:req.body.name,
         numberPhone:req.body.numberPhone,
+        slug:creatingSlug,
         numberGuest:req.body.numberGuest
+      })
+      endpointResponse({
+        res,
+        message: 'Test retrieved successfully',
+        body: response,
+      })
+    } catch (error) {
+      console.log(error)
+      const httpError = createHttpError(
+        error.statusCode,
+        `[Error retrieving index] - [index - POST]: ${error.message}`,
+      )
+      next(httpError)
+    }
+  }),
+  getGuest: catchAsync(async (req,res,next) => {
+    try {
+      const response = await Guest.findOne({
+        where: {
+          slug:req.params.slug
+        }
       })
       endpointResponse({
         res,
@@ -107,27 +130,6 @@ module.exports = {
       next(httpError)
     }
   }),
-  sendInvitation: catchAsync(async (req,res,next)=>{
-    try {
-      const user = await User.findOne({
-        where: {
-          email:req.params.email
-        }
-      })
-      const response = await user.getGuests()
-      endpointResponse({
-        res,
-        message: 'Test retrieved successfully',
-        body: response,
-      })
-    } catch (error) {
-      const httpError = createHttpError(
-        error.statusCode,
-        `[Error retrieving index] - [index - POST]: ${error.message}`,
-      )
-      next(httpError)
-    }
-  }),
   createQRWhatsapp: catchAsync(async (req,res,next)=>{
     try {
       client.on('qr', qr => {
@@ -170,7 +172,7 @@ module.exports = {
         body: await client.getState(),
       })
       const sanitized_number = number.toString().replace(/[- )(]/g, ""); 
-      const final_number = `57${sanitized_number.substring(sanitized_number.length - 10)}`;
+      const final_number = `${sanitized_number.substring(sanitized_number.length - 10)}`;
       const number_details = await client.getNumberId(final_number);
       if (number_details) {
           await client.sendMessage(number_details._serialized, `Hola que tal, como estas? estoy feliz de invitarte a mi boda para ver tu invitacion puedes entrar al link ⛪️ \n \n \n ${message}`);

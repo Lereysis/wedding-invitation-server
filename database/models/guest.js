@@ -18,6 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     numberPhone: DataTypes.STRING,
     numberGuest: DataTypes.STRING,
+    slug: DataTypes.STRING,
     isConfirmed: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
