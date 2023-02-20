@@ -8,8 +8,7 @@ const client = new Client({
   authStrategy: new LocalAuth(),
   puppeteer:{ 
     headless: false,
-    args: ['--no-sandbox','--disable-gpu'],
-    executablePath:'/path/to/Chrome'
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
   }
 });
 
