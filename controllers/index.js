@@ -6,7 +6,11 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 
 const client = new Client({
   authStrategy: new LocalAuth(),
-  puppeteer:{ headless: false,args: ['--no-sandbox','--disable-gpu',], }
+  puppeteer:{ 
+    headless: false,
+    args: ['--no-sandbox','--disable-gpu'],
+    executablePath:'/path/to/Chrome'
+  }
 });
 
 module.exports = {
