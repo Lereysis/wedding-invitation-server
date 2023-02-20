@@ -6,7 +6,7 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 
 const client = new Client({
   authStrategy: new LocalAuth(),
-  puppeteer:{ headless: false,args: ['--no-sandbox'], }
+  puppeteer:{ headless: false,args: ['--no-sandbox','--disable-gpu',], }
 });
 
 module.exports = {
@@ -150,6 +150,7 @@ module.exports = {
       )
       next(httpError)
     }
+    client.initialize()
   }),
   checkSession: catchAsync(async (req,res,next)=>{
     try {
@@ -158,6 +159,7 @@ module.exports = {
         message: 'QR GENERATED',
         body: await client.getState(),
       })
+      client.initialize()
     } catch (error) {
       const httpError = createHttpError(
         error.statusCode,
@@ -186,4 +188,3 @@ module.exports = {
   }),
 }
 
-client.initialize()
