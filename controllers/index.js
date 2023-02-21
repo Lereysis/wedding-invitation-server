@@ -8,7 +8,7 @@ const client = new Client({
   authStrategy: new LocalAuth(),
   puppeteer:{ 
     headless: false,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: ['--no-sandbox'],
   }
 });
 
