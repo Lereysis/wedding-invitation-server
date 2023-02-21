@@ -6,11 +6,9 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 
 const client = new Client({
   authStrategy: new LocalAuth(),
-  puppeteer:{ 
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  }
 });
+
+client.initialize()
 
 module.exports = {
   getUsers: catchAsync(async (req, res, next) => {
@@ -145,7 +143,8 @@ module.exports = {
           body: qr,
         })
       });
-     client.initialize()
+      
+      // client.initialize()
     } catch (error) {
       const httpError = createHttpError(
         error.statusCode,
@@ -153,7 +152,7 @@ module.exports = {
       )
       next(httpError)
     }
-    client.initialize()
+    // client.initialize()
   }),
   checkSession: catchAsync(async (req,res,next)=>{
     try {
@@ -162,7 +161,7 @@ module.exports = {
         message: 'QR GENERATED',
         body: await client.getState(),
       })
-      client.initialize()
+      // client.initialize()
     } catch (error) {
       const httpError = createHttpError(
         error.statusCode,
@@ -180,7 +179,8 @@ module.exports = {
         body: await client.getState(),
       })
       const sanitized_number = number.toString().replace(/[- )(]/g, ""); 
-      await client.sendMessage(sanitized_number+'@c.us', `Hola que tal, como estas? estoy feliz de invitarte a mi boda para ver tu invitacion puedes entrar al link ⛪️ \n \n \n ${message.trim()}`);
+      const number_details = await client.getNumberId(sanitized_number);
+      await client.sendMessage(number_details._serialized, `Hola que tal, como estas? estoy feliz de invitarte a mi boda para ver tu invitacion puedes entrar al link ⛪️ \n \n \n ${message.trim()}`);
     } catch (error) {
       const httpError = createHttpError(
         error.statusCode,
@@ -190,4 +190,5 @@ module.exports = {
     }
   }),
 }
+// client.initialize()
 
