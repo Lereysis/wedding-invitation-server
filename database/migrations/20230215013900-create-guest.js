@@ -20,6 +20,9 @@ module.exports = {
       slug: {
         type: Sequelize.STRING
       },
+      messageCustomize: {
+        type: Sequelize.STRING
+      },
       isConfirmed: {
         type: Sequelize.BOOLEAN,
         defaultValue: false,

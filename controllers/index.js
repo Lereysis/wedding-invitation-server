@@ -19,7 +19,7 @@ module.exports = {
       const response = await User.findAll()
       endpointResponse({
         res,
-        message: 'Test retrieved successfully',
+        message: 'Success',
         body: response,
       })
     } catch (error) {
@@ -32,10 +32,18 @@ module.exports = {
   }),
   postUser: catchAsync(async (req, res, next) => {
     try {
+      const user = await User.findOne({
+        where: {
+          email:req.body.email
+        }
+      })
+      if (user instanceof User) {
+        throw new Error('Mail already exists on our platform')
+      }
       const response = await User.create({...req.body})
       endpointResponse({
         res,
-        message: 'Test retrieved successfully',
+        message: 'Success',
         body: response,
       })
     } catch (error) {
@@ -48,6 +56,17 @@ module.exports = {
   }),
   createGuest: catchAsync(async (req,res,next) => {
     try {
+
+      const guest = await Guest.findOne({
+        where: {
+          numberPhone:req.body.numberPhone,
+        }
+      })
+
+      if (guest instanceof Guest) {
+        throw new Error('Number Phone already exists on our platform')
+      }
+
       const user = await User.findOne({
         where: {
           email:req.body.email
@@ -58,15 +77,15 @@ module.exports = {
         name:req.body.name,
         numberPhone:req.body.numberPhone,
         slug:creatingSlug,
-        numberGuest:req.body.numberGuest
+        numberGuest:req.body.numberGuest,
+        messageCustomize:req.body.messageCustomize
       })
       endpointResponse({
         res,
-        message: 'Test retrieved successfully',
+        message: 'Success',
         body: response,
       })
     } catch (error) {
-      console.log(error)
       const httpError = createHttpError(
         error.statusCode,
         `[Error retrieving index] - [index - POST]: ${error.message}`,
@@ -83,7 +102,57 @@ module.exports = {
       })
       endpointResponse({
         res,
-        message: 'Test retrieved successfully',
+        message: 'Success',
+        body: response,
+      })
+    } catch (error) {
+      console.log(error)
+      const httpError = createHttpError(
+        error.statusCode,
+        `[Error retrieving index] - [index - POST]: ${error.message}`,
+      )
+      next(httpError)
+    }
+  }),
+  deleteGuest: catchAsync(async (req,res,next) => {
+    try {
+      const { numberPhone } = req.body
+      await Guest.destroy({
+        where: {
+          numberPhone
+        }
+      })
+      endpointResponse({
+        res,
+        message: 'Success',
+        body: true,
+      })
+    } catch (error) {
+      console.log(error)
+      const httpError = createHttpError(
+        error.statusCode,
+        `[Error retrieving index] - [index - POST]: ${error.message}`,
+      )
+      next(httpError)
+    }
+  }),
+  updateGuest: catchAsync(async (req,res,next) => {
+    try {
+      const { oldGuest, newGuest } = req.body
+      const guest = await Guest.findOne({
+        where: {
+          numberPhone:req.body.newGuest.numberPhone,
+        }
+      })
+      if (guest instanceof Guest) {
+        throw new Error('Number Phone already exists on our platform')
+      }
+      const response = await Guest.update({...newGuest},{
+        where: {...oldGuest}
+      })
+      endpointResponse({
+        res,
+        message: 'Success',
         body: response,
       })
     } catch (error) {
@@ -105,7 +174,7 @@ module.exports = {
       const response = await user.getGuests()
       endpointResponse({
         res,
-        message: 'Test retrieved successfully',
+        message: 'Success',
         body: response,
       })
     } catch (error) {
@@ -126,7 +195,7 @@ module.exports = {
       })
       endpointResponse({
         res,
-        message: 'Test retrieved successfully',
+        message: 'Success',
         body: user,
       })
     } catch (error) {
@@ -161,10 +230,9 @@ module.exports = {
     try {
       endpointResponse({
         res,
-        message: 'QR GENERATED',
+        message: 'Success',
         body: await client.getState(),
       })
-      // client.initialize()
     } catch (error) {
       const httpError = createHttpError(
         error.statusCode,
@@ -175,15 +243,15 @@ module.exports = {
   }),
   sendMessage: catchAsync(async (req,res,next)=>{
     try {
-      const { message, number } = req.body
+      const { url, number, message } = req.body
       endpointResponse({
         res,
-        message: 'QR GENERATED',
+        message: 'Sent success',
         body: await client.getState(),
       })
       const sanitized_number = number.toString().replace(/[- )(]/g, ""); 
       const number_details = await client.getNumberId(sanitized_number);
-      await client.sendMessage(number_details._serialized, `Hola que tal, como estas? estoy feliz de invitarte a mi boda para ver tu invitacion puedes entrar al link ⛪️ \n \n \n ${message.trim()}`);
+      await client.sendMessage(number_details._serialized, `${message} \n \n ${url.trim()}`);
     } catch (error) {
       const httpError = createHttpError(
         error.statusCode,
@@ -193,5 +261,4 @@ module.exports = {
     }
   }),
 }
-// client.initialize()
 

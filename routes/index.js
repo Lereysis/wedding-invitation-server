@@ -8,15 +8,18 @@ const {
     createQRWhatsapp, 
     getGuest, 
     sendMessage,
-    isConfirmedGuest
+    isConfirmedGuest,
+    deleteGuest,
+    updateGuest
 } = require('../controllers/index')
 
 const router = express.Router()
 
-// example of a route with index controller get function
 router.get('/', getUsers)
 router.post('/user', postUser)
 router.post('/guest', createGuest)
+router.delete('/guest', deleteGuest)
+router.put('/guest', updateGuest)
 router.get('/guest/:email', getAllGuest)
 router.get('/guest-invitation/:slug', getGuest)
 router.get('/qr-whatsapp', createQRWhatsapp)
