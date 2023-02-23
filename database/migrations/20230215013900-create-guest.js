@@ -21,7 +21,7 @@ module.exports = {
         type: Sequelize.STRING
       },
       messageCustomize: {
-        type: Sequelize.STRING
+        type: Sequelize.TEXT
       },
       isConfirmed: {
         type: Sequelize.BOOLEAN,

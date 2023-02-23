@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     numberPhone: DataTypes.STRING,
     numberGuest: DataTypes.STRING,
     slug: DataTypes.STRING,
-    messageCustomize: DataTypes.STRING,
+    messageCustomize: DataTypes.TEXT,
     isConfirmed: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
