@@ -15,7 +15,7 @@ const {
 
 const router = express.Router()
 
-router.get('/user:email', getUser)
+router.get('/user/:email', getUser)
 router.post('/user', postUser)
 router.post('/guest', createGuest)
 router.delete('/guest', deleteGuest)
