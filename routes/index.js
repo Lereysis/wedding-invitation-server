@@ -1,6 +1,6 @@
 const express = require('express')
 const { 
-    getUsers, 
+    getUser, 
     postUser, 
     createGuest, 
     getAllGuest, 
@@ -15,7 +15,7 @@ const {
 
 const router = express.Router()
 
-router.get('/', getUsers)
+router.get('/user:email', getUser)
 router.post('/user', postUser)
 router.post('/guest', createGuest)
 router.delete('/guest', deleteGuest)

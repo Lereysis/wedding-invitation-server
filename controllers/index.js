@@ -14,9 +14,13 @@ const client = new Client({
 client.initialize()
 
 module.exports = {
-  getUsers: catchAsync(async (req, res, next) => {
+  getUser: catchAsync(async (req, res, next) => {
     try {
-      const response = await User.findAll()
+      const response = await User.findOne({
+        where: {
+          email:req.params.email
+        }
+      })
       endpointResponse({
         res,
         message: 'Success',
