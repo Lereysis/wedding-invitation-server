@@ -121,9 +121,10 @@ module.exports = {
   deleteGuest: catchAsync(async (req,res,next) => {
     try {
       const { numberPhone } = req.body
+      
       await Guest.destroy({
         where: {
-          numberPhone
+          numberPhone: req.body.numberPhone
         }
       })
       endpointResponse({
@@ -143,14 +144,7 @@ module.exports = {
   updateGuest: catchAsync(async (req,res,next) => {
     try {
       const { oldGuest, newGuest } = req.body
-      const guest = await Guest.findOne({
-        where: {
-          numberPhone:req.body.newGuest.numberPhone,
-        }
-      })
-      if (guest instanceof Guest) {
-        throw new Error('Number Phone already exists on our platform')
-      }
+     
       const response = await Guest.update({...newGuest},{
         where: {...oldGuest}
       })
