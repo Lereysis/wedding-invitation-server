@@ -171,46 +171,62 @@ module.exports = {
           email:req.params.email,
         }
       })
-      let limitResult = limit || 10
+      let limitResult = Number(limit) || 10
       let searchResult = search || ''
-      let response = []
+      let numberPage = Number(page)
 
-      let totalGuestDatabase = await user.getGuests()
-
-      if (Boolean(isConfirmed)) {
-        response = await user.getGuests({
-          where:{
-            isConfirmed: {
-              [Op.eq]: isConfirmed.toLowerCase() == 'true' ? true : false,
-            },
-            name: {
-              [Op.like]: `%${searchResult}%`,
-            },
-          },
-          limit: limitResult,
-          offset: Number(page) ? Number(page) * Number(limitResult) : 0
-        })
-      } else {
-        response = await user.getGuests({
+      const countGuest = await User.findAndCountAll({
+        where: {
+          email: req.params.email,
+        },
+        include: {
+          model: Guest,
           where: {
+            ...(
+                Boolean(isConfirmed) && {isConfirmed: {
+                  [Op.is]: isConfirmed?.toLowerCase() === 'true' ? true : false,
+                },
+            }),
             name: {
               [Op.like]: `%${searchResult}%`,
             },
+          }
+        }
+      });
+
+      const response = await user.getGuests({
+        where: {
+          ...(
+              Boolean(isConfirmed) && {isConfirmed: {
+                [Op.is]: isConfirmed?.toLowerCase() === 'true' ? true : false,
+              },
+          }),
+          name: {
+            [Op.like]: `%${searchResult}%`,
           },
-          limit: limitResult,
-          offset: Number(page) ? Number(page) * Number(limitResult) : 0
-        })
-      } 
-      const totalGuest = response.length
+        },
+        order: [
+          ['createdAt', 'DESC'],
+        ],
+        limit: limitResult,
+        offset: numberPage ? numberPage * limitResult : 0
+      })
+      
+      let totalPages = Math.ceil(countGuest.count / limitResult) 
       endpointResponse({
         res,
         message: 'Success',
         meta:{
           pagination:{
-            totalGuests: totalGuestDatabase.length,
-            page: Number(page) + 1,
-            next:  Number(page) + 1 > Math.ceil(totalGuest / Number(limitResult)) ? null : Number(page) + 1 + 1 ,
-            previous: Number(page) - 1 + 1 <= 0 || Number(page) - 1 + 1 > Math.ceil(totalGuest / Number(limitResult)) ? null : Number(page) - 1 + 1 
+            totalGuests:countGuest.count,
+            page: numberPage + 1,
+            next:  numberPage + 1 >= totalPages ? null : numberPage + 1 + 1 ,
+            previous: numberPage - 1 + 1 <= 0 || numberPage - 1 + 1 > totalPages ? null : numberPage - 1 + 1 
+          },
+          infoCountGuests: {
+            totalSumGuest: countGuest.rows[0]?.Guests?.reduce((accumulator, currentValue) => accumulator + Number(currentValue.numberGuest), 0),
+            totalIsConfirmed: countGuest.rows[0]?.Guests?.filter(guest => guest.isConfirmed === true).reduce((accumulator, currentValue) => accumulator + Number(currentValue.numberGuest), 0),
+            totalIsNotConfirmed: countGuest.rows[0]?.Guests?.filter(guest => guest.isConfirmed === false).reduce((accumulator, currentValue) => accumulator + Number(currentValue.numberGuest), 0),
           }
         },
         body: response,
