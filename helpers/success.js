@@ -3,6 +3,7 @@ const endpointResponse = ({
   code = 200,
   status = true,
   message,
+  meta,
   body,
   options,
 }) => {
@@ -10,6 +11,7 @@ const endpointResponse = ({
     status,
     code,
     message,
+    meta,
     body,
     options,
   })

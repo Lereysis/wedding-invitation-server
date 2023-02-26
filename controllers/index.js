@@ -1,6 +1,7 @@
 const createHttpError = require('http-errors')
 const { User, Guest } = require('../database/models')
 const { endpointResponse } = require('../helpers/success')
+const { Op } = require("sequelize");
 const { catchAsync } = require('../helpers/catchAsync')
 const { Client, LocalAuth } = require('whatsapp-web.js');
 
@@ -164,15 +165,50 @@ module.exports = {
   }),
   getAllGuest: catchAsync(async (req,res,next)=>{
     try {
+      const {search,limit,page,isConfirmed} = req.query
       const user = await User.findOne({
         where: {
-          email:req.params.email
+          email:req.params.email,
         }
       })
-      const response = await user.getGuests()
+      let limitResult = limit || 10
+      let searchResult = search || ''
+      let response = []
+      if (Boolean(isConfirmed)) {
+        response = await user.getGuests({
+          where:{
+            isConfirmed: {
+              [Op.eq]: isConfirmed.toLowerCase() == 'true' ? true : false,
+            },
+            name: {
+              [Op.like]: `%${searchResult}%`,
+            },
+          },
+          limit: limitResult,
+          offset: Number(page) ? Number(page) * Number(limitResult) : 0
+        })
+      } else {
+        response = await user.getGuests({
+          where: {
+            name: {
+              [Op.like]: `%${searchResult}%`,
+            },
+          },
+          limit: limitResult,
+          offset: Number(page) ? Number(page) * Number(limitResult) : 0
+        })
+      } 
+      const totalGuest = response.length
       endpointResponse({
         res,
         message: 'Success',
+        meta:{
+          pagination:{
+            page: Number(page) + 1,
+            next:  Number(page) + 1 > Math.ceil(totalGuest / Number(limitResult)) ? null : Number(page) + 1 + 1 ,
+            previous: Number(page) - 1 + 1 <= 0 || Number(page) - 1 + 1 > Math.ceil(totalGuest / Number(limitResult)) ? null : Number(page) - 1 + 1 
+          }
+        },
         body: response,
       })
     } catch (error) {
