@@ -174,6 +174,9 @@ module.exports = {
       let limitResult = limit || 10
       let searchResult = search || ''
       let response = []
+
+      let totalGuestDatabase = await user.getGuests()
+
       if (Boolean(isConfirmed)) {
         response = await user.getGuests({
           where:{
@@ -204,6 +207,7 @@ module.exports = {
         message: 'Success',
         meta:{
           pagination:{
+            totalGuests: totalGuestDatabase.length,
             page: Number(page) + 1,
             next:  Number(page) + 1 > Math.ceil(totalGuest / Number(limitResult)) ? null : Number(page) + 1 + 1 ,
             previous: Number(page) - 1 + 1 <= 0 || Number(page) - 1 + 1 > Math.ceil(totalGuest / Number(limitResult)) ? null : Number(page) - 1 + 1 
