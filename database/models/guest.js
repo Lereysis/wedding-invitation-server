@@ -20,9 +20,10 @@ module.exports = (sequelize, DataTypes) => {
     numberGuest: DataTypes.STRING,
     slug: DataTypes.STRING,
     messageCustomize: DataTypes.TEXT,
+    partyMates: DataTypes.TEXT,
     isConfirmed: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false,
+      defaultValue: null,
     },
   }, {
     sequelize,

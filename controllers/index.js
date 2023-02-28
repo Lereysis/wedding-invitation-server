@@ -3,7 +3,7 @@ const { User, Guest } = require('../database/models')
 const { endpointResponse } = require('../helpers/success')
 const { Op } = require("sequelize");
 const { catchAsync } = require('../helpers/catchAsync')
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 
 const client = new Client({
   authStrategy: new LocalAuth(),
@@ -65,6 +65,12 @@ module.exports = {
       const guest = await Guest.findOne({
         where: {
           numberPhone:req.body.numberPhone,
+        },
+        include: {
+          model: User,
+          where: {
+            email:req.body.email
+          }
         }
       })
 
@@ -184,7 +190,7 @@ module.exports = {
           where: {
             ...(
                 Boolean(isConfirmed) && {isConfirmed: {
-                  [Op.is]: isConfirmed?.toLowerCase() === 'true' ? true : false,
+                  [Op.is]: isConfirmed?.toLowerCase() === 'null' ? null : isConfirmed?.toLowerCase() === 'true' ? true : false,
                 },
             }),
             name: {
@@ -198,7 +204,7 @@ module.exports = {
         where: {
           ...(
               Boolean(isConfirmed) && {isConfirmed: {
-                [Op.is]: isConfirmed?.toLowerCase() === 'true' ? true : false,
+                [Op.is]: isConfirmed?.toLowerCase() === 'null' ? null : isConfirmed?.toLowerCase() === 'true' ? true : false,
               },
           }),
           name: {
@@ -226,7 +232,8 @@ module.exports = {
           infoCountGuests: {
             totalSumGuest: countGuest.rows[0]?.Guests?.reduce((accumulator, currentValue) => accumulator + Number(currentValue.numberGuest), 0),
             totalIsConfirmed: countGuest.rows[0]?.Guests?.filter(guest => guest.isConfirmed === true).reduce((accumulator, currentValue) => accumulator + Number(currentValue.numberGuest), 0),
-            totalIsNotConfirmed: countGuest.rows[0]?.Guests?.filter(guest => guest.isConfirmed === false).reduce((accumulator, currentValue) => accumulator + Number(currentValue.numberGuest), 0),
+            totalIsDeclined: countGuest.rows[0]?.Guests?.filter(guest => guest.isConfirmed === false).reduce((accumulator, currentValue) => accumulator + Number(currentValue.numberGuest), 0),
+            totalIsNotConfirmed: countGuest.rows[0]?.Guests?.filter(guest => guest.isConfirmed === null).reduce((accumulator, currentValue) => accumulator + Number(currentValue.numberGuest), 0),
           }
         },
         body: response,
@@ -241,8 +248,8 @@ module.exports = {
   }),
   isConfirmedGuest: catchAsync(async (req,res,next)=>{
     try {
-      const { numberPhone } = req.body
-      const user = await Guest.update({isConfirmed:true},{
+      const { numberPhone, responseGuest} = req.body
+      const user = await Guest.update({isConfirmed:responseGuest},{
         where: {
           numberPhone
         }
@@ -298,14 +305,18 @@ module.exports = {
   sendMessage: catchAsync(async (req,res,next)=>{
     try {
       const { url, number, message } = req.body
+      const media = await MessageMedia.fromUrl('https://i.ibb.co/sW9cDPf/img-ws.jpg');
+      const sanitized_number = number.toString().replace(/[- )(]/g, ""); 
+      const number_details = await client.getNumberId(sanitized_number);
+      if (!Boolean(number_details)) {throw new Error('Error')}
+      await client.sendMessage(number_details._serialized, media, {
+        caption: `${message} \n \n ${url.trim()}`,
+      });
       endpointResponse({
         res,
         message: 'Sent success',
         body: await client.getState(),
       })
-      const sanitized_number = number.toString().replace(/[- )(]/g, ""); 
-      const number_details = await client.getNumberId(sanitized_number);
-      await client.sendMessage(number_details._serialized, `${message} \n \n ${url.trim()}`);
     } catch (error) {
       const httpError = createHttpError(
         error.statusCode,
