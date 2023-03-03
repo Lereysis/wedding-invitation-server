@@ -1,5 +1,5 @@
 const createHttpError = require('http-errors')
-const { User, Guest } = require('../database/models')
+const { User, Guest, Accompanist } = require('../database/models')
 const { endpointResponse } = require('../helpers/success')
 const { Op } = require("sequelize");
 const { catchAsync } = require('../helpers/catchAsync')
@@ -246,18 +246,197 @@ module.exports = {
       next(httpError)
     }
   }),
+  getDetailsGuest: catchAsync(async (req,res,next)=>{
+    try {
+      const {email} = req.params
+      const {id,name} = req.query
+      const response = await User.findOne({
+        where: {
+          email,
+        },
+        include: {
+          model: Guest,
+          where: {
+            id,name
+          },
+          include: {
+            model: Accompanist
+          }
+        }
+      });
+      endpointResponse({
+        res,
+        message: 'Success',
+        body: response,
+      })
+    } catch (error) {
+      const httpError = createHttpError(
+        error.statusCode,
+        `[Error retrieving index] - [index - POST]: ${error.message}`,
+      )
+      next(httpError)
+    }
+  }),
+  getListGuest: catchAsync(async (req,res,next)=>{
+    try {
+      const {email} = req.params
+      const response = await User.findOne({
+        where: {
+          email,
+        },
+        include: {
+          model: Guest,
+          include: {
+            model: Accompanist
+          }
+        }
+      });
+      endpointResponse({
+        res,
+        message: 'Success',
+        body: response,
+      })
+    } catch (error) {
+      const httpError = createHttpError(
+        error.statusCode,
+        `[Error retrieving index] - [index - POST]: ${error.message}`,
+      )
+      next(httpError)
+    }
+  }),
   isConfirmedGuest: catchAsync(async (req,res,next)=>{
     try {
-      const { numberPhone, responseGuest} = req.body
+      const { numberPhone, responseGuest, id} = req.body
+      console.log(responseGuest)
       const user = await Guest.update({isConfirmed:responseGuest},{
         where: {
-          numberPhone
+          numberPhone,
+          id
         }
       })
       endpointResponse({
         res,
         message: 'Success',
         body: user,
+      })
+    } catch (error) {
+      const httpError = createHttpError(
+        error.statusCode,
+        `[Error retrieving index] - [index - POST]: ${error.message}`,
+      )
+      next(httpError)
+    }
+  }),
+  createAccompanist: catchAsync(async (req,res,next) => {
+    try {
+      const {id,name,dataAccompanist} = req.body
+      const guest = await Guest.findOne({
+        where: {
+          id:Number(id),
+          name
+        },
+        include: {
+          model: User,
+        }
+      });
+      const createdResponse = dataAccompanist.map( async data => {
+        return await guest.createAccompanist({...data});
+      })
+
+      endpointResponse({
+        res,
+        message: 'Success',
+        body: createdResponse.length,
+      })
+    } catch (error) {
+      const httpError = createHttpError(
+        error.statusCode,
+        `[Error retrieving index] - [index - POST]: ${error.message}`,
+      )
+      next(httpError)
+    }
+  }),
+  updateAccompanist: catchAsync(async (req,res,next) => {
+    try {
+
+      const guest = await Guest.findOne({
+        where: {
+          numberPhone:req.body.numberPhone,
+        },
+        include: {
+          model: User,
+          where: {
+            email:req.body.email
+          }
+        }
+      })
+
+      if (guest instanceof Guest) {
+        throw new Error('Number Phone already exists on our platform')
+      }
+
+      const user = await User.findOne({
+        where: {
+          email:req.body.email
+        }
+      })
+      const creatingSlug = req.body.name.trim().toLowerCase().replace(/ /g,"-");
+      const response = await user.createGuest({
+        name:req.body.name,
+        numberPhone:req.body.numberPhone,
+        slug:creatingSlug,
+        numberGuest:req.body.numberGuest,
+        messageCustomize:req.body.messageCustomize
+      })
+      endpointResponse({
+        res,
+        message: 'Success',
+        body: response,
+      })
+    } catch (error) {
+      const httpError = createHttpError(
+        error.statusCode,
+        `[Error retrieving index] - [index - POST]: ${error.message}`,
+      )
+      next(httpError)
+    }
+  }),
+  deleteAccompanist: catchAsync(async (req,res,next) => {
+    try {
+
+      const guest = await Guest.findOne({
+        where: {
+          numberPhone:req.body.numberPhone,
+        },
+        include: {
+          model: User,
+          where: {
+            email:req.body.email
+          }
+        }
+      })
+
+      if (guest instanceof Guest) {
+        throw new Error('Number Phone already exists on our platform')
+      }
+
+      const user = await User.findOne({
+        where: {
+          email:req.body.email
+        }
+      })
+      const creatingSlug = req.body.name.trim().toLowerCase().replace(/ /g,"-");
+      const response = await user.createGuest({
+        name:req.body.name,
+        numberPhone:req.body.numberPhone,
+        slug:creatingSlug,
+        numberGuest:req.body.numberGuest,
+        messageCustomize:req.body.messageCustomize
+      })
+      endpointResponse({
+        res,
+        message: 'Success',
+        body: response,
       })
     } catch (error) {
       const httpError = createHttpError(
