@@ -152,17 +152,21 @@ module.exports = {
     try {
       const { oldGuest, newGuest, email } = req.body
 
-      const guest = await Guest.findOne({
-        where: {
-          numberPhone:newGuest.numberPhone,
-        },
-        include: {
-          model: User,
+      let guest = null
+
+      if (oldGuest.numberPhone !== newGuest.numberPhone) {
+        guest = await Guest.findOne({
           where: {
-            email:req.body.email
+            numberPhone:newGuest.numberPhone,
+          },
+          include: {
+            model: User,
+            where: {
+              email
+            }
           }
-        }
-      })
+        })
+      }
 
       if (guest instanceof Guest) {
         throw new Error('Number Phone already exists on our platform')
