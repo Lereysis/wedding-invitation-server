@@ -150,7 +150,23 @@ module.exports = {
   }),
   updateGuest: catchAsync(async (req,res,next) => {
     try {
-      const { oldGuest, newGuest } = req.body
+      const { oldGuest, newGuest, email } = req.body
+
+      const guest = await Guest.findOne({
+        where: {
+          numberPhone:newGuest.numberPhone,
+        },
+        include: {
+          model: User,
+          where: {
+            email:req.body.email
+          }
+        }
+      })
+
+      if (guest instanceof Guest) {
+        throw new Error('Number Phone already exists on our platform')
+      }
      
       const response = await Guest.update({...newGuest},{
         where: {...oldGuest}
@@ -306,20 +322,87 @@ module.exports = {
   getListGuest: catchAsync(async (req,res,next)=>{
     try {
       const {email} = req.params
+      const {search,limit,page} = req.query
+
+      let limitResult = Number(limit) || 10
+      let searchResult = search || ''
+      let numberPage = Number(page)
+
+      const countGuest = await User.findAndCountAll({
+        where: {
+          email,
+        },
+        include: {
+          model: Guest,
+          where: {
+            name: {
+              [Op.like]: `%${searchResult}%`,
+            },
+          },
+          include: {
+            model: Accompanist,
+            where: {
+              name: {
+                [Op.not]: null,   
+              },
+              identifier: {
+                [Op.not]: null,   
+              },
+              age: {
+                [Op.not]: null,   
+              }
+            }
+          },
+        },
+      });
+      
       const response = await User.findOne({
         where: {
           email,
         },
         include: {
           model: Guest,
+          where: {
+            name: {
+              [Op.like]: `%${searchResult}%`,
+            },
+          },
           include: {
-            model: Accompanist
-          }
-        }
+            model: Accompanist,
+            where: {
+              name: {
+                [Op.not]: null,   
+              },
+              identifier: {
+                [Op.not]: null,   
+              },
+              age: {
+                [Op.not]: null,   
+              }
+            }
+          },
+          limit: limitResult,
+          offset: numberPage ? numberPage * limitResult : 0,
+          order: [
+            ['createdAt', 'DESC'],
+          ],
+        },
+  
       });
+
+      let totalPages = Math.ceil((countGuest.count - 1) / limitResult) 
+
       endpointResponse({
         res,
         message: 'Success',
+        meta:{
+          pagination:{
+            totalGuests:countGuest.count,
+            page: numberPage + 1,
+            next:  numberPage + 1 >= totalPages  ? null : numberPage + 1 + 1 ,
+            previous: numberPage - 1 + 1 <= 0 || numberPage - 1 + 1 > totalPages - 1 ? null : numberPage - 1 + 1 
+          },
+        },
         body: response,
       })
     } catch (error) {
