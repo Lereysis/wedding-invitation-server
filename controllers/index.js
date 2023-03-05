@@ -277,6 +277,32 @@ module.exports = {
       next(httpError)
     }
   }),
+  getFormReminder: catchAsync(async (req,res,next)=>{
+    try {
+      const {id,name} = req.query
+      console.log(id,name)
+      const response = await Guest.findOne({
+        where: {
+          id,
+          name,
+        },
+        include: {
+          model: User,
+        }
+      });
+      endpointResponse({
+        res,
+        message: 'Success',
+        body: response,
+      })
+    } catch (error) {
+      const httpError = createHttpError(
+        error.statusCode,
+        `[Error retrieving index] - [index - POST]: ${error.message}`,
+      )
+      next(httpError)
+    }
+  }),
   getListGuest: catchAsync(async (req,res,next)=>{
     try {
       const {email} = req.params
@@ -491,6 +517,26 @@ module.exports = {
       await client.sendMessage(number_details._serialized, media, {
         caption: `${message} \n \n ${url.trim()}`,
       });
+      endpointResponse({
+        res,
+        message: 'Sent success',
+        body: await client.getState(),
+      })
+    } catch (error) {
+      const httpError = createHttpError(
+        error.statusCode,
+        `[Error retrieving index] - [index - POST]: ${error.message}`,
+      )
+      next(httpError)
+    }
+  }),
+  sendMessageReminder: catchAsync(async (req,res,next)=>{
+    try {
+      const { url, number } = req.body
+      const sanitized_number = number.toString().replace(/[- )(]/g, ""); 
+      const number_details = await client.getNumberId(sanitized_number);
+      if (!Boolean(number_details)) {throw new Error('Error')}
+      await client.sendMessage(number_details._serialized,`Mensaje de recordatorio ${url}`);
       endpointResponse({
         res,
         message: 'Sent success',
