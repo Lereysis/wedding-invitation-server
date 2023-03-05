@@ -17,7 +17,8 @@ const {
     getFormReminder,
     sendMessageReminder,
     updateAccompanist,
-    deleteAccompanist
+    deleteAccompanist,
+    sendNotificacion
 } = require('../controllers/index')
 
 const router = express.Router()
@@ -40,5 +41,6 @@ router.get('/check-session', checkSession)
 router.post('/send-message', sendMessage)
 router.post('/send-message-reminder', sendMessageReminder)
 router.post('/confirmed', isConfirmedGuest)
+router.post('/send-notification', sendNotificacion)
 
 module.exports = router
