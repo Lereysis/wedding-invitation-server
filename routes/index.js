@@ -15,7 +15,9 @@ const {
     createAccompanist,
     getListGuest,
     getFormReminder,
-    sendMessageReminder
+    sendMessageReminder,
+    updateAccompanist,
+    deleteAccompanist
 } = require('../controllers/index')
 
 const router = express.Router()
@@ -24,7 +26,9 @@ router.get('/user/:email', getUser)
 router.post('/user', postUser)
 router.post('/guest', createGuest)
 router.delete('/guest', deleteGuest)
+router.delete('/accompanist', deleteAccompanist)
 router.put('/guest', updateGuest)
+router.put('/accompanist', updateAccompanist)
 router.get('/guest/:email', getAllGuest)
 router.get('/guest/list/:email', getListGuest)
 router.get('/guest/details/:email', getDetailsGuest)
