@@ -9,9 +9,11 @@ const path = require('path');
 const nodemailer = require('nodemailer');
 
 const client = new Client({
-  authStrategy: new LocalAuth(),
+  authStrategy: new LocalAuth({
+    dataPath:'wwebjs-auth'
+  }),
   puppeteer:{
-    args:['--no-sandbox']
+    args:['--no-sandbox'],
   }
 });
 
