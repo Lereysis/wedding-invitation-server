@@ -639,7 +639,7 @@ module.exports = {
       const mailOptions = {
         from: process.env.EMAIL_NOTIFICATION,
         to: `${user.email}`,
-        subject: `Notificacion de el estado de una invitacion`,
+        subject: `Nueva Actualización de Estado`,
         html:htmlRenderizado,
       };
 
